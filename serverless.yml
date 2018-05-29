@@ -1,0 +1,38 @@
+service: webapp-backend
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+  stage: dev
+  region: eu-central-1
+  profile: serverless-admin
+  memorySize: 1024
+  environment:
+    JWT_SECRET: ${self:custom.secrets.JWT_SECRET}
+    DB: ${self:custom.secrets.DB}
+
+plugins:
+  - serverless-finch
+  - serverless-offline
+
+custom:
+  secrets: ${file(secrets.json)}
+  client:
+    bucketName: webapp-frontend
+    distributionFolder: client/dist 
+    indexDocument: index.html
+    errorDocument: index.html
+
+functions:
+  app:
+    handler: server.run
+    events:
+      - http:
+          path: /
+          method: ANY
+          cors: true
+      - http:
+          path: /{proxy+}
+          method: ANY
+          cors: true
+         
